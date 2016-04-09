@@ -33,8 +33,14 @@ public class STEditor : EditorWindow
     //Private enum.
     private enum EditTarget
     {
-        CsharpScriptTemplate,
-        JavaScriptTemplate
+        CsharpBehaviour,
+        JavascriptBehaviour,
+        StateMachineBehaviour,
+        SubStateMachineBehaviour,
+        SurfaceShader,
+        UnlitShader,
+        ImageEffectShader,
+        ComputeShader
     }//enum_end
     #endregion
 
@@ -64,38 +70,73 @@ public class STEditor : EditorWindow
         EditorGUILayout.LabelField("ScriptTemplate");
         EditorGUILayout.Space();
         if (GUILayout.Button("Current", GUILayout.Width(60)))
-            sTText = EditorPrefs.GetString(editTarget.ToString());
+            GetScriptTemplateText();
         if (GUILayout.Button("Save", GUILayout.Width(60)))
-            ReplaceScriptTemplate();
+            SaveScriptTemplate();
         EditorGUILayout.EndHorizontal();
 
-        using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos, GUILayout.ExpandHeight(true)))
-        {
-            sTText = EditorGUILayout.TextArea(sTText, GUILayout.ExpandHeight(true));
-            scrollPos = scrollView.scrollPosition;
-        }
+		scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+		sTText = EditorGUILayout.TextArea(sTText, GUILayout.ExpandHeight(true));
+		EditorGUILayout.EndScrollView();
+
         EditorGUILayout.EndVertical();
     }//OnGUI()_end
 
     /// <summary>
-    /// Replace ScriptTemplate.
+    /// Get editer's script template path.
     /// </summary>
-    private void ReplaceScriptTemplate()
+    private string GetScriptTemplatePath()
     {
-        EditorPrefs.SetString(editTarget.ToString(), sTText);
-        string editorPath = string.Empty;
+        string scriptPath = string.Empty;
         switch (editTarget)
         {
-            case EditTarget.CsharpScriptTemplate:
-                editorPath = "81-C# Script-NewBehaviourScript.cs.txt";
+            case EditTarget.CsharpBehaviour:
+                scriptPath = "81-C# Script-NewBehaviourScript.cs.txt";
                 break;
-            case EditTarget.JavaScriptTemplate:
-                editorPath = "82-Javascript-NewBehaviourScript.js.txt";
+            case EditTarget.JavascriptBehaviour:
+                scriptPath = "82-Javascript-NewBehaviourScript.js.txt";
+                break;
+            case EditTarget.StateMachineBehaviour:
+                scriptPath = "86-C# Script-NewStateMachineBehaviourScript.cs.txt";
+                break;
+            case EditTarget.SubStateMachineBehaviour:
+                scriptPath = "86-C# Script-NewSubStateMachineBehaviourScript.cs.txt";
+                break;
+            case EditTarget.SurfaceShader:
+                scriptPath = "83-Shader__Standard Surface Shader-NewSurfaceShader.shader.txt";
+                break;
+            case EditTarget.UnlitShader:
+                scriptPath = "84-Shader__Unlit Shader-NewUnlitShader.shader.txt";
+                break;
+            case EditTarget.ImageEffectShader:
+                scriptPath = "85-Shader__Image Effect Shader-NewImageEffectShader.shader.txt";
+                break;
+            case EditTarget.ComputeShader:
+                scriptPath = "90-Shader__Compute Shader-NewComputeShader.compute.txt";
                 break;
         }//switch_end
-        editorPath = EditorApplication.applicationContentsPath +
-            "/Resources/ScriptTemplates/" + editorPath;
-        File.WriteAllText(editorPath, sTText, Encoding.Default);
+        return EditorApplication.applicationContentsPath +
+            "/Resources/ScriptTemplates/" + scriptPath;
+    }//GetS...()_end
+
+    /// <summary>
+    /// Get script template text.
+    /// </summary>
+    private void GetScriptTemplateText()
+    {
+        var scriptPath = GetScriptTemplatePath();
+        if (File.Exists(scriptPath))
+            sTText = File.ReadAllText(scriptPath, Encoding.Default);
+        else
+            sTText = string.Empty;
+    }//GetS...()_end
+
+    /// <summary>
+    /// Save ScriptTemplate.
+    /// </summary>
+    private void SaveScriptTemplate()
+    {
+        File.WriteAllText(GetScriptTemplatePath(), sTText, Encoding.Default);
         bool closeEditor = EditorUtility.DisplayDialog(
             "Save Template",
             "Your edit content is already save to unity3d editor's script template!",
@@ -104,7 +145,7 @@ public class STEditor : EditorWindow
             );
         if(closeEditor)
             instance.Close();
-    }//ReplaceS...()_end
+    }//SaveS...()_end
     #endregion
 }//Class_end
 
@@ -119,9 +160,11 @@ public class STUpdater : UnityEditor.AssetModificationProcessor
     /// </summary>
     private static void OnWillCreateAsset(string assetPath)
     {
+        //Get extension.
         assetPath = assetPath.Replace(".meta", string.Empty);
         var fileSuffix = Path.GetExtension(assetPath);
-        if (fileSuffix != ".cs" && fileSuffix != ".js")
+        if (fileSuffix != ".cs" && fileSuffix != ".js" && fileSuffix != ".shader" &&
+		    fileSuffix != ".compute")
             return;
 
         //Get time.
@@ -130,13 +173,13 @@ public class STUpdater : UnityEditor.AssetModificationProcessor
         var copyrightTime = nowTime.Year.ToString() +
             "-" + (nowTime.Year + 1).ToString();
 
-        //Update ScriptTemplate.
+        //Update scripttemplate.
         var content = File.ReadAllText(assetPath);
         content = content.Replace("#CreateTime#", createTime);
         content = content.Replace("#CopyrightTime#", copyrightTime);
         File.WriteAllText(assetPath, content);
 
-        //Refresh AssetDatabase.
+        //Refresh asset database.
         AssetDatabase.Refresh();
     }//OnW...()_end
 }//Class_end
