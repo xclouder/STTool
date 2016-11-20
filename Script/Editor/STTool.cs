@@ -49,13 +49,23 @@ public class STEditor : EditorWindow
     private static EditTarget editTarget;
     private static string sTText;
     private static Vector2 scrollPos;
+	private static string author;
+	private static string company;
+	private static bool isEnabled;
     #endregion
 
     #region Method
     //Show the window in unity editor menu.
-    [MenuItem("Tool/STEditor")]
+    [MenuItem("Tools/STTool")]
     private static void ShowSTEditor()
     {
+		//EditorPrefs.SetBool("STTool_Enabled", isEnabled);
+		//EditorPrefs.SetString("STTool_Author", author);
+		//EditorPrefs.SetString("STTool_Company", company);
+		isEnabled = EditorPrefs.GetBool("STTool_Enabled", false);
+		author = EditorPrefs.GetString("STTool_Author", "");
+		company = EditorPrefs.GetString("STTool_Company", "");
+
         instance = EditorWindow.GetWindow<STEditor>();
         instance.Show();
     }//ShowS...()_end
@@ -64,7 +74,16 @@ public class STEditor : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.BeginVertical();
+
+		isEnabled = EditorGUILayout.Toggle("Enable", isEnabled, GUILayout.Width(160));
+
         editTarget = (EditTarget)EditorGUILayout.EnumPopup("EditTarget", editTarget);
+
+		author = EditorGUILayout.TextField("Author(#Author#):", author, GUILayout.Width(200));
+		company = EditorGUILayout.TextField("Company(#Company#):", company, GUILayout.Width(200));
+
+		if (GUILayout.Button("Save Params", GUILayout.Width(160)))
+			SaveSettings();
 
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("ScriptTemplate");
@@ -146,6 +165,13 @@ public class STEditor : EditorWindow
         if(closeEditor)
             instance.Close();
     }//SaveS...()_end
+
+	private void SaveSettings()
+	{
+		EditorPrefs.SetBool("STTool_Enabled", isEnabled);
+		EditorPrefs.SetString("STTool_Author", author);
+		EditorPrefs.SetString("STTool_Company", company);
+	}
     #endregion
 }//Class_end
 
@@ -160,6 +186,10 @@ public class STUpdater : UnityEditor.AssetModificationProcessor
     /// </summary>
     private static void OnWillCreateAsset(string assetPath)
     {
+		var enabled = EditorPrefs.GetBool("STTool_Enabled", false);
+		if (!enabled)
+			return;
+
         //Get extension.
         assetPath = assetPath.Replace(".meta", string.Empty);
         var fileSuffix = Path.GetExtension(assetPath);
@@ -167,9 +197,12 @@ public class STUpdater : UnityEditor.AssetModificationProcessor
 		    fileSuffix != ".compute")
             return;
 
+		var author = EditorPrefs.GetString("STTool_Author", "please set author in STTool setting window");
+		var company = EditorPrefs.GetString("STTool_Company", "please set company in STTool setting window");
+
         //Get time.
         var nowTime = DateTime.Now;
-        var createTime = nowTime.ToShortDateString();
+		var createTime = nowTime.ToShortDateString();
         var copyrightTime = nowTime.Year.ToString() +
             "-" + (nowTime.Year + 1).ToString();
 
@@ -177,6 +210,8 @@ public class STUpdater : UnityEditor.AssetModificationProcessor
         var content = File.ReadAllText(assetPath);
         content = content.Replace("#CreateTime#", createTime);
         content = content.Replace("#CopyrightTime#", copyrightTime);
+		content = content.Replace("#Author#", author);
+		content = content.Replace("#Company#", company);
         File.WriteAllText(assetPath, content);
 
         //Refresh asset database.
