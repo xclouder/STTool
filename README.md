@@ -12,6 +12,7 @@ http://download.csdn.net/detail/mogoson/9359959
 3、在Unity3D编辑器菜单中选择Tools/STTool，打开设置窗口  
 4、填写Author、Company为相应的值。点击"Save Params"  
 >比如 Author:xClouder  Company:EZFun  
+
 5、重启Unity3D  
 6、在Project面板右键选择创建脚本时会多出一项“c# Formal Sript”，用这种方式创建的cs文件会自动带有文件头信息：  
 
