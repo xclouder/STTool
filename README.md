@@ -7,13 +7,13 @@ http://download.csdn.net/detail/mogoson/9359959
 为了方便继续优化，我将其挪到了github上。
 
 # How To Use：
-1、将插件clone到unity3d工程的Assets/Plugins/目录下
-2、将STTool/Template/80-c# Formal Sript-NewBehaviourScript.cs拷贝到*Unity3d安装目录*的Resources/ScriptTemplates/ 目录下
-3、在Unity3D编辑器菜单中选择Tools/STTool，打开设置窗口
-4、填写Author、Company为相应的值。点击"Save Params"
->比如 Author:xClouder  Company:EZFun
-5、重启Unity3D
-6、在Project面板右键选择创建脚本时会多出一项“c# Formal Sript”，用这种方式创建的cs文件会自动带有文件头信息：
+1、将插件clone到unity3d工程的Assets/Plugins/目录下  
+2、将STTool/Template/80-c# Formal Sript-NewBehaviourScript.cs拷贝到*Unity3d安装目录*的Resources/ScriptTemplates/ 目录下  
+3、在Unity3D编辑器菜单中选择Tools/STTool，打开设置窗口  
+4、填写Author、Company为相应的值。点击"Save Params"  
+>比如 Author:xClouder  Company:EZFun  
+5、重启Unity3D  
+6、在Project面板右键选择创建脚本时会多出一项“c# Formal Sript”，用这种方式创建的cs文件会自动带有文件头信息：  
 
 ```
 /************************************************************
